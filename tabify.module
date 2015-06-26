@@ -1,0 +1,125 @@
+<?php
+
+/**
+ * @file
+ * Horizontal Tabify custom blocks
+ */
+
+/**
+ * Implements hook_block_info().
+ */
+function tabify_block_info() {
+  $blocks['custom_block_one'] = array(
+    'info' => t('Custom Block One'),
+  );
+  // Block for File Listing under Project Transcripts section.
+  $blocks['custom_block_two'] = array(
+    'info' => t('Custom Block Two'),
+  );
+
+  // Block for File Listing under Project Transcripts section.
+  $blocks['custom_block_three'] = array(
+    'info' => t('Custom Block Three'),
+  );
+  return $blocks;
+}	
+
+/**
+ * Implements hook_block_view().
+ */
+function tabify_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+  	case 'custom_block_one':
+      $block['subject'] = 'First Name Block';
+      $block['content'] = array(
+        // Calling helper function to return files.
+        '#markup' => _tabify_get_form('_tabify_form_one'),
+      );
+  	  break;
+  	case 'custom_block_two':
+  	  $block['subject'] = 'Last Name Block';
+      $block['content'] = array(
+        // Calling helper function to return files.
+        '#markup' => _tabify_get_form('_tabify_form_two'),
+      );
+      break;
+  	case 'custom_block_three':
+  	  $block['content'] = array(
+        // Calling helper function to return files.
+        '#markup' => _tabify_get_tabbed_block(),
+      );
+      break;
+  	default:
+  		# code...
+  		break;
+  }
+  return $block;
+}
+
+function _tabify_get_form($form) {
+  $get_form = drupal_get_form($form);
+  $rendered_form = drupal_render($get_form);
+  return $rendered_form;
+}
+
+function _tabify_form_one($form, &$form_state) {
+  $form['first_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+  );
+  $form['submit_button_first'] = array(
+      '#type' => 'submit',
+      '#value' => t('Submit First Name'),
+  );
+  return $form;
+}
+
+function _tabify_form_two($form, &$form_state) {
+  $form['last_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Name'),
+  );
+  $form['submit_button_last'] = array(
+      '#type' => 'submit',
+      '#value' => t('Submit Last Name'),
+  );
+  return $form;
+}
+
+function _tabify_form_one_submit($form, &$form_state) {
+  dpm($form_state);
+  dpm("first name submit");
+}
+
+
+function _tabify_form_two_submit($form, &$form_state) {
+  dpm($form_state);
+  dpm("last name submit");
+}
+
+function _tabify_get_tabbed_block() {
+
+  // add a container to hold your tabs
+  $tabs = '<div id="resource-tabs"><ul>';
+  $content = '';
+  $blocks_to_tabify = array('custom_block_one','custom_block_two');
+
+  foreach($blocks_to_tabify as $block_id) {
+    $block = module_invoke('tabify', 'block_view', $block_id);
+    $tabs .= "<li><a href='#tabs-" . $block_id . "'>" . $block['subject'] . "</a></li>";
+    $content .= "<div id='tabs-" . $block_id . "'>" . render($block['content']) . "</div>";
+  }
+
+  $tabs .= '</ul>';
+  $tabs .= $content;
+  $tabs .= '</div>';
+	
+  $tabs;
+
+  // and add the js to handle these tabs
+  drupal_add_library('system', 'ui.tabs');
+  drupal_add_js('jQuery(document).ready(function(){jQuery("#resource-tabs").tabs();});', 'inline');
+
+  return $tabs;
+}

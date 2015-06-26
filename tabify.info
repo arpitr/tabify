@@ -1,0 +1,5 @@
+name = Tabify
+description = Custom Module to Tabidy custom blocks.
+core = 7.x
+
+package = Custom
